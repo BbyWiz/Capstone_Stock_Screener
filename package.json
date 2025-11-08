@@ -1,0 +1,30 @@
+{
+  "name": "intelligent_stock_screener",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test:api && npm run test:web",
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w server\" \"npm run start -w client\" \"npm run dev --prefix server\" \"npm run start --prefix client\"",
+    "dev:api": "npm run dev -w server",
+    "dev:web": "npm run start -w client",
+    "format": "prettier \"**/*.{ts,js,css,html,json,md}\" --write",
+    "test:api": "npm --prefix server test",
+    "test:web": "npm --prefix client test -- --watch=false",
+    "lint": "npm run lint --prefix client",
+    "prepare": "husky"
+  },
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

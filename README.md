@@ -1,81 +1,133 @@
-[text](https://www.alphavantage.co/documentation/)
+````markdown
+[text](https://www.npmjs.com/package/yahoo-finance2)
 
-# Alpha Vantage API Reference (Free Endpoints Overview)
+# Yahoo Finance API Reference (via `yahoo-finance2` npm module)
 
-This document summarizes the parameters and free functions relevant to this project’s integration with the **Alpha Vantage** API.
-
----
-
-## API Parameters
-
-| Parameter      | Required | Description                                                                                                                                    |
-| -------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **function**   | Yes      | The time series or data type you want to retrieve. Example: `function=TIME_SERIES_DAILY`.                                                      |
-| **symbol**     | Yes      | The equity or asset symbol (ticker). Example: `symbol=IBM`.                                                                                    |
-| **outputsize** | No       | Determines how much data is returned. <br>• `compact` → latest 100 data points (default). <br>• `full` → complete historical data (20+ years). |
-| **datatype**   | No       | Response format. <br>• `json` → structured JSON data (default). <br>• `csv` → plain CSV format.                                                |
-| **apikey**     | Yes      | Your Alpha Vantage API key. Register for a free key at [alphavantage.co](https://www.alphavantage.co).                                         |
+This document summarizes the commonly used endpoints and parameters available through the **Yahoo Finance** unofficial API wrapper **`yahoo-finance2`**, which provides reliable market, fundamental, and historical data without the need for an API key.
 
 ---
 
-## Free Functions
+## Overview
 
-These endpoints are available in the **free tier** of Alpha Vantage and can be used without a premium subscription.
+Unlike Alpha Vantage, **Yahoo Finance** access through this module does not require authentication or an API key.  
+It can be installed via npm and used directly in Node.js:
 
-### Core (Required for This Project)
+```bash
+npm install yahoo-finance2
+````
 
-- `TIME_SERIES_DAILY`
-- `OVERVIEW`
+Import and initialize:
 
-These two endpoints provide price and basic fundamental data—enough to implement screening logic such as:
-
-- Price > EMA(50)
-- RSI < 70
-- P/E < 25
-
----
-
-### Optional Helpers
-
-- `LISTING_STATUS` — verify active/valid tickers
-- `GLOBAL_QUOTE` — fetch the latest trading data for a single symbol
-- `SYMBOL_SEARCH` — search by company name or partial ticker
+```js
+import yahooFinance from 'yahoo-finance2';
+```
 
 ---
 
-### Extra Fundamentals (for expansion)
+## Core Endpoints
 
-- `INCOME_STATEMENT`
-- `BALANCE_SHEET`
-- `CASH_FLOW`
-- `EARNINGS`
-
-These endpoints expose deeper financials if you decide to extend your screener to multi-factor or valuation models.
+| Function                    | Description                                                                      | Example                                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **quote**                   | Fetches real-time quote data for one or more tickers (price, volume, P/E, etc.). | `await yahooFinance.quote('AAPL');`                                                         |
+| **historical**              | Returns daily, weekly, or monthly historical prices and volumes for a symbol.    | `await yahooFinance.historical('MSFT', { period1: '2024-01-01', period2: '2025-01-01' });`  |
+| **search**                  | Searches for tickers by company name or keyword.                                 | `await yahooFinance.search('Tesla');`                                                       |
+| **quoteSummary**            | Provides detailed fundamentals and financial statements.                         | `await yahooFinance.quoteSummary('GOOG', { modules: ['financialData', 'summaryDetail'] });` |
+| **trendingSymbols**         | Returns the most popular or trending tickers by region.                          | `await yahooFinance.trendingSymbols('US');`                                                 |
+| **recommendationsBySymbol** | Retrieves analyst recommendations for a given ticker.                            | `await yahooFinance.recommendationsBySymbol('AMZN');`                                       |
 
 ---
 
-### Other Free Data to Explore
+## Optional / Advanced Endpoints
 
-- `CURRENCY_EXCHANGE_RATE`
-- `FX_DAILY`
-- `CRYPTO_DAILY`
-- `ECONOMIC_INDICATOR` (GDP, CPI, unemployment rate, etc.)
-- `COMMODITY` (WTI, Brent, gold, copper, wheat, etc.)
+| Function           | Description                                                                   | Example                                                              |
+| ------------------ | ----------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **insights**       | Returns key insights such as ESG scores, sentiment, and technical indicators. | `await yahooFinance.insights('AAPL');`                               |
+| **options**        | Fetches option chain data (calls, puts, strikes, expirations).                | `await yahooFinance.options('TSLA');`                                |
+| **chart**          | Provides raw chart data with historical pricing and indicators.               | `await yahooFinance.chart('NVDA', { interval: '1d', range: '1y' });` |
+| **quoteCombine**   | Combines `quote` and `quoteSummary` data for a single request.                | `await yahooFinance.quoteCombine('NFLX');`                           |
+| **marketSummary**  | Returns a snapshot of market indexes (Dow, Nasdaq, etc.).                     | `await yahooFinance.marketSummary();`                                |
+| **marketTrending** | Returns trending tickers globally.                                            | `await yahooFinance.marketTrending();`                               |
 
-These broaden your data scope into macroeconomic, forex, crypto, and commodity domains.
+---
+
+## Parameters for Common Calls
+
+| Parameter             | Required | Description                                                                                                    |
+| --------------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| **symbol**            | Yes      | The stock ticker symbol, e.g. `AAPL`, `MSFT`, `TSLA`.                                                          |
+| **period1 / period2** | No       | Start and end dates for historical data (ISO date or timestamp).                                               |
+| **interval**          | No       | Timeframe for price aggregation (`1d`, `1wk`, `1mo`, `1h`). Default: `1d`.                                     |
+| **modules**           | No       | In `quoteSummary`, specify which data modules to retrieve (e.g. `financialData`, `summaryDetail`, `earnings`). |
+| **region**            | No       | Region for market/trending queries (e.g. `US`, `GB`, `IN`).                                                    |
+
+---
+
+## Example Use Cases
+
+### Fetch Latest Quote
+
+```js
+const quote = await yahooFinance.quote('AAPL');
+console.log(quote.regularMarketPrice);
+```
+
+### Historical Prices for a Time Range
+
+```js
+const data = await yahooFinance.historical('MSFT', {
+  period1: '2024-01-01',
+  period2: '2025-01-01',
+  interval: '1d'
+});
+console.log(data.slice(-5));
+```
+
+### Company Fundamentals
+
+```js
+const fundamentals = await yahooFinance.quoteSummary('GOOG', {
+  modules: ['financialData', 'summaryDetail', 'price']
+});
+console.log(fundamentals);
+```
+
+### Search by Company Name
+
+```js
+const results = await yahooFinance.search('Nvidia');
+console.log(results.quotes);
+```
 
 ---
 
 ## Notes
 
-- `TIME_SERIES_DAILY_ADJUSTED` and other “adjusted” or intraday series are **premium-only**.
-- Free keys are rate-limited (roughly 25 requests per day).
-- To stay within limits, consider caching data or using `outputsize=compact` for efficiency.
+* **No API key required** — data is scraped and parsed from Yahoo’s public finance endpoints.
+* Ideal for **screeners**, **dashboards**, and **analysis tools**.
+* Rate limits are client-side (throttled by Yahoo if abused, not API-enforced).
+* For stability, cache responses or limit queries per second.
 
 ---
 
-### Example Request
+### Example Output
 
-```bash
-https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&outputsize=compact&datatype=json&apikey=YOUR_API_KEY
+```json
+{
+  "symbol": "AAPL",
+  "regularMarketPrice": 228.34,
+  "regularMarketDayHigh": 230.00,
+  "regularMarketDayLow": 226.45,
+  "trailingPE": 29.8,
+  "marketCap": 3.52e12
+}
+```
+
+---
+
+### Reference
+
+* **Official npm page:** [yahoo-finance2](https://www.npmjs.com/package/yahoo-finance2)
+* **GitHub repository:** [github.com/gadicc/node-yahoo-finance2](https://github.com/gadicc/node-yahoo-finance2)
+
+```
 ```

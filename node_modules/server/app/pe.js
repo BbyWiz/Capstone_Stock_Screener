@@ -1,4 +1,3 @@
-// server/app/pe.js
 /**
  * Compute P/E from Yahoo quote data.
  * Accepts either:

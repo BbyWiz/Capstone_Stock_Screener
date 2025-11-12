@@ -25,7 +25,6 @@ app.use(
 );
 
 // routes
-app.use("/api", apiRouter);
 app.router.stack
   .filter((r) => r.route)
   .forEach((r) =>
@@ -74,14 +73,10 @@ if (result.error) {
   );
 }
 
-app.use("/", yahooAuth);
-
 app.use((req, res) => res.status(404).json({ error: "Not Found" }));
 app.use((err, req, res, next) => {
   console.error(err);
-  res
-    .status(err.status || 500)
-    .json({ error: err.message || "Internal Server Error" });
+  res.status(err.status || 500).json({ error: err.message || "Internal Server Error" });
 });
 
 app.listen(PORT, () => {

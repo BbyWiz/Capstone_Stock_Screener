@@ -1,4 +1,3 @@
-// server/app/rsi.js
 /**
  * Relative Strength Index using simple averages (Wilder variant can be added later).
  * Accepts: array of bars with { close } or an array of close numbers.

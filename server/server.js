@@ -53,25 +53,25 @@ app.get("/", (req, res) => {
 });
 
 // TROUBLESHOOTING
-["FMP_API_KEY", "FMP_URL"].forEach((k) =>
-  console.log(`[env] ${k}=${process.env[k] ? `${k.length}` : "(MISSING)"}`)
-);
-const resolved = path.resolve(__dirname, "..", ".env");
-console.log("[dotenv] resolved path:", resolved);
+// ["FMP_API_KEY", "FMP_URL"].forEach((k) =>
+//   console.log(`[env] ${k}=${process.env[k] ? `${k.length}` : "(MISSING)"}`)
+// );
+// const resolved = path.resolve(__dirname, "..", ".env");
+// console.log("[dotenv] resolved path:", resolved);
 
-const result = require("dotenv").config({
-  path: resolved,
-  override: true,
-  debug: true,
-});
-if (result.error) {
-  console.error("[dotenv] ERROR:", result.error);
-} else {
-  console.log(
-    "[dotenv] parsed keys:",
-    result.parsed ? Object.keys(result.parsed) : []
-  );
-}
+// const result = require("dotenv").config({
+//   path: resolved,
+//   override: true,
+//   debug: true,
+// });
+// if (result.error) {
+//   console.error("[dotenv] ERROR:", result.error);
+// } else {
+//   console.log(
+//     "[dotenv] parsed keys:",
+//     result.parsed ? Object.keys(result.parsed) : []
+//   );
+// }
 
 app.use((req, res) => res.status(404).json({ error: "Not Found" }));
 app.use((err, req, res, next) => {

@@ -1,21 +1,14 @@
+````markdown
 
 # Yahoo Finance API Reference (via `yahoo-finance2` npm module)
-reference: (https://www.npmjs.com/package/yahoo-finance2)
+(https://www.npmjs.com/package/yahoo-finance2)
 
-This document summarizes the commonly used endpoints and parameters available through the **Yahoo Finance** unofficial API wrapper **`yahoo-finance2`**, which provides reliable market, fundamental, and historical data. API key provided by Yahoo Developer webpage.
-
----
-
-## Overview
- 
-bash:
-npm install yahoo-finance2
+This document summarizes the commonly used endpoints and parameters available through the **Yahoo Finance** unofficial API wrapper **`yahoo-finance2`**, which provides reliable market, fundamental, and historical data without the need for an API key.
 ````
-
- 
-
----
-
+Import and initialize:
+```js
+import yahooFinance from 'yahoo-finance2';
+```
 ## Core Endpoints
 
 | Function                    | Description                                                                      | Example                                                                                     |
@@ -118,3 +111,5 @@ console.log(results.quotes);
 
 ```
 ```
+
+***SPLIT OFF INTO FRONTEND***

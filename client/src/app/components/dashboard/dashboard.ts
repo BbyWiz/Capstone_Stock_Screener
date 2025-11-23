@@ -31,7 +31,7 @@ export class Dashboard {
     this.error = null;
     this.result = null;
     const trimmed = (this.symbol || '').trim().toUpperCase();
-    if (!trimmed) {
+    if (!trimmed || trimmed == '') {
       this.error = 'Symbol is required';
       return;
     }

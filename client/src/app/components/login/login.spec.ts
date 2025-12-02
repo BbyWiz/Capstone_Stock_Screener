@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SummaryPanel } from './summary-panel';
+import { Login } from './login';
 
-describe('SummaryPanel', () => {
-  let component: SummaryPanel;
-  let fixture: ComponentFixture<SummaryPanel>;
+describe('Login', () => {
+  let component: Login;
+  let fixture: ComponentFixture<Login>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SummaryPanel]
-    })
-    .compileComponents();
+      imports: [Login],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(SummaryPanel);
+    fixture = TestBed.createComponent(Login);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

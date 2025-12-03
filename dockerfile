@@ -1,27 +1,37 @@
-# Use a small, recent Node image
+# ===== Stage 1: build Angular client =====
+FROM node:20-alpine AS client-build
+
+# Work inside the Angular project
+WORKDIR /usr/src/app/client
+
+# Install Angular deps
+COPY client/package*.json ./
+RUN npm ci
+
+# Copy the rest of the Angular app and build
+COPY client/ .
+RUN npm run build
+
+# ===== Stage 2: server + static Angular =====
 FROM node:20-alpine
 
-# Work in /app
-WORKDIR /app
+# Work inside the server project
+WORKDIR /usr/src/app/server
 
-# Copy only root package.json (for the start script) and server package.json
-COPY package.json ./
-COPY server/package*.json ./server/
+# Install server deps
+COPY server/package*.json ./
+RUN npm ci --omit=dev
 
-# Install server dependencies (from server/package.json)
-WORKDIR /app/server
-RUN npm install --omit=dev
+# Copy server source
+COPY server/ .
 
-# Now copy the rest of the source
-WORKDIR /app
-COPY . .
+# Copy built Angular app from stage 1
+# Result: /usr/src/app/client/dist/... will exist inside the container
+COPY --from=client-build /usr/src/app/client/dist /usr/src/app/client/dist
 
-# Make sure Node sees the right working dir when we run
-WORKDIR /app
-
-# Azure will override PORT, but we expose 4300 for local runs
-ENV PORT=4300
+# Environment and port
+ENV NODE_ENV=production
 EXPOSE 4300
 
-# Run the API using the start script we just added
-CMD ["npm", "start"]
+# Start Express API
+CMD ["node", "server.js"]

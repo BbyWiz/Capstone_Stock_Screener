@@ -1,7 +1,30 @@
 const YahooFinance = require("yahoo-finance2").default;
 let yf = null;
 
-// Lazy-load Yahoo Finance to avoid startup failures?
+//Cache with time to live set
+const cache = new Map();
+const CACHE_TTL = 60000; 
+
+function getCached(key) {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  return null;
+}
+
+function setCache(key, data) {
+  cache.set(key, { data, timestamp: Date.now() });
+  // Cleaning any old entries periodically
+  if (cache.size > 100) {
+    const cutoff = Date.now() - CACHE_TTL;
+    for (const [k, v] of cache.entries()) {
+      if (v.timestamp < cutoff) cache.delete(k);
+    }
+  }
+}
+
+// Lazy-load Yahoo Finance to avoid startup failures
 function getYahooFinance() {
   if (!yf) {
     try {
@@ -23,9 +46,15 @@ async function quoteSummary(symbol, modules = ["price"]) {
 // quote: quick price / PE fields
 async function quote(symbol) {
   if (!symbol) throw new Error("symbol is required");
-  return getYahooFinance().quote(String(symbol).trim().toUpperCase(), {
+  const key = `quote:${String(symbol).trim().toUpperCase()}`;
+  const cached = getCached(key);
+  if (cached) return cached;
+  
+  const result = await getYahooFinance().quote(String(symbol).trim().toUpperCase(), {
     fields: ["symbol", "regularMarketPrice", "currency", "trailingPE", "forwardPE"],
   });
+  setCache(key, result);
+  return result;
 }
 
 // historical: daily OHLC
@@ -35,13 +64,21 @@ async function historical(symbol, { period1, period2, interval = "1d" } = {}) {
   const oneYearAgo = new Date(now);
   oneYearAgo.setFullYear(now.getFullYear() - 1);
 
-  return getYahooFinance().historical(String(symbol).trim().toUpperCase(), {
-    period1: period1 || oneYearAgo.toISOString().slice(0, 10),
-    period2: period2 || now.toISOString().slice(0, 10),
+  const p1 = period1 || oneYearAgo.toISOString().slice(0, 10);
+  const p2 = period2 || now.toISOString().slice(0, 10);
+  const key = `historical:${String(symbol).trim().toUpperCase()}:${p1}:${p2}:${interval}`;
+  const cached = getCached(key);
+  if (cached) return cached;
+
+  const result = await getYahooFinance().historical(String(symbol).trim().toUpperCase(), {
+    period1: p1,
+    period2: p2,
     //these are '1d' | '1wk' | '1mo'
     interval, 
     events: "history",
   });
+  setCache(key, result);
+  return result;
 }
 
 // search: company/symbol search

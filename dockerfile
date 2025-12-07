@@ -11,7 +11,7 @@ RUN npm install
 COPY client/ .
 RUN npm run build || (echo "Angular build failed!" && exit 1)
 
-# Angular outputs to dist/client/browser/ - flatten this to dist/
+#Angular outputs to dist/client/browser/ => flattens this to dist/
 RUN if [ -d dist/client/browser ]; then \
       mkdir -p /tmp/dist && \
       cp -r dist/client/browser/* /tmp/dist/ && \
@@ -44,14 +44,14 @@ FROM node:20-alpine AS runtime
 
 WORKDIR /app
 
-# Set production mode
+#Set production mode
 ENV NODE_ENV=production
 ENV PORT=3000
 
 COPY --from=server-build /app/server ./server
 COPY --from=client-build /app/client/dist ./client/dist
 
-# Verify client files are present
+#Verify client files are present
 RUN test -f client/dist/index.html || (echo "ERROR: Client dist not copied!" && ls -laR client/dist && exit 1)
 RUN echo "✓ Runtime setup complete - client files ready"
 

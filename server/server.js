@@ -136,7 +136,7 @@ app.use((err, req, res, next) => {
     .status(err.status || 500)
     .json({ error: err.message || "Internal Server Error" });
 });
-
+//PLenty of console logs for troubleshooting Docker deployment
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`API listening on 0.0.0.0:${PORT}`);
   console.log(`Environment: NODE_ENV=${process.env.NODE_ENV || "development"}`);

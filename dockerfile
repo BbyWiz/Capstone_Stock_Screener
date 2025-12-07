@@ -1,7 +1,5 @@
-###########################
-# Stage 1: Build Angular Client
-###########################
-FROM node:20-alpine AS client-build
+#Build Angular Client
+FROM node:22-alpine AS client-build
 
 WORKDIR /app/client
 
@@ -22,11 +20,8 @@ RUN if [ -d dist/client/browser ]; then \
 RUN test -f dist/index.html || (echo "ERROR: dist/index.html not found!" && ls -laR dist/ && exit 1)
 RUN echo "✓ Client build successful"
 
-
-###########################
-# Stage 2: Build Node Server
-###########################
-FROM node:20-alpine AS server-build
+#Build Node Server
+FROM node:22-alpine AS server-build
 
 WORKDIR /app/server
 
@@ -36,11 +31,8 @@ RUN npm install --omit=dev
 COPY server/ .
 RUN echo "✓ Server dependencies installed"
 
-
-###########################
-# Stage 3: Runtime Image
-###########################
-FROM node:20-alpine AS runtime
+#Runtime Image
+FROM node:22-alpine AS runtime
 
 WORKDIR /app
 

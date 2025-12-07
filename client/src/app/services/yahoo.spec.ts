@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 
 import { Yahoo } from './yahoo';
 
@@ -10,7 +11,11 @@ describe('Yahoo service', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        Yahoo
+      ],
     });
     service = TestBed.inject(Yahoo);
     httpMock = TestBed.inject(HttpTestingController);
@@ -39,6 +44,7 @@ describe('Yahoo service', () => {
       symbol: 'AAPL',
       smaWindow: 7,
       rsiPeriod: 14,
+      summary: '',
     });
 
     req.flush(mockResponse);
@@ -49,17 +55,18 @@ describe('Yahoo service', () => {
     const first = service.screen('MSFT', 10, 5, summary).subscribe();
     const second = service.screen('TSLA', 20, 14, summary).subscribe();
 
-    const req1 = httpMock.expectOne((r) => r.url.endsWith('/api/yahoo/screen'));
-    expect(req1.request.body.symbol).toBe('MSFT');
-    expect(req1.request.body.smaWindow).toBe(10);
-    expect(req1.request.body.rsiPeriod).toBe(5);
-    req1.flush({ symbol: 'MSFT' });
+    const reqs = httpMock.match((r) => r.url.endsWith('/api/yahoo/screen'));
+    expect(reqs.length).toBe(2);
+    
+    expect(reqs[0].request.body.symbol).toBe('MSFT');
+    expect(reqs[0].request.body.smaWindow).toBe(10);
+    expect(reqs[0].request.body.rsiPeriod).toBe(5);
+    reqs[0].flush({ symbol: 'MSFT' });
 
-    const req2 = httpMock.expectOne((r) => r.url.endsWith('/api/yahoo/screen'));
-    expect(req2.request.body.symbol).toBe('TSLA');
-    expect(req2.request.body.smaWindow).toBe(20);
-    expect(req2.request.body.rsiPeriod).toBe(14);
-    req2.flush({ symbol: 'TSLA' });
+    expect(reqs[1].request.body.symbol).toBe('TSLA');
+    expect(reqs[1].request.body.smaWindow).toBe(20);
+    expect(reqs[1].request.body.rsiPeriod).toBe(14);
+    reqs[1].flush({ symbol: 'TSLA' });
 
     first.unsubscribe();
     second.unsubscribe();
